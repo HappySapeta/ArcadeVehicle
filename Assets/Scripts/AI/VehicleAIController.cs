@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CarAiController : MonoBehaviour
+public class VehicleAIController : MonoBehaviour
 {
     public enum controlFrom
     {
@@ -26,31 +26,25 @@ public class CarAiController : MonoBehaviour
     public float angleToTarget { get; set; }
     private float headingShift;
     private Transform[] trackPoints;
-    private InputManager inputManager;
-    private carController car;
+    private VehicleInputController _vehicleInput;
+    private VehicleMovement car;
     private Rigidbody carRigidbody;
     public TrackBuilder trackBuilder { get; set; }
-    private DataRecorder tdr;
 
     [HideInInspector] public float throttle, brake, steer;
-
-    private float steerOverride;
-    private float brakeOverride;
-
+    
     void Awake()
     {
-        inputManager = GetComponent<InputManager>();
+        _vehicleInput = GetComponent<VehicleInputController>();
         trackPoints = new Transform[track.childCount];
 
         for (int i = 0; i < trackPoints.Length; i++)
         {
             trackPoints[i] = track.GetChild(i);
         }
-        car = GetComponent<carController>();
+        car = GetComponent<VehicleMovement>();
         carRigidbody = GetComponent<Rigidbody>();
         trackBuilder = track.GetComponent<TrackBuilder>();
-
-        tdr = GetComponent<DataRecorder>();
     }
 
     void Update()
@@ -59,17 +53,14 @@ public class CarAiController : MonoBehaviour
         SetSteerInput();
         SetThrottleBrakeInput();
 
-        inputManager.forward = throttle;
-        inputManager.backward = brake;
-        inputManager.Horizontal = steer;
+        _vehicleInput.forward = throttle;
+        _vehicleInput.backward = brake;
+        _vehicleInput.Horizontal = steer;
     }
 
     void SetThrottleBrakeInput()
     {
-        brakeOverride = tdr.avgObstacleDensity * obstacleAvoidanceBrakeWeight * car.currSpeed;//(float)brain.Predict (tdr.StoreCurrentScenario ()) [1];
-
         float accel = throttleOffset - (factor + 1 / distanceToTarget) * brakeSensitivty;
-        accel -= brakeOverride;
         accel = Mathf.Clamp(accel, -1, 1);
 
         throttle = brake = 0;

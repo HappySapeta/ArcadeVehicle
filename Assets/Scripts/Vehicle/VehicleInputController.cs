@@ -9,7 +9,7 @@ internal enum playerType
 	bot
 }
 
-public class InputManager : MonoBehaviour
+public class VehicleInputController : MonoBehaviour
 {
 	[SerializeField]private playerType _playerType;
 

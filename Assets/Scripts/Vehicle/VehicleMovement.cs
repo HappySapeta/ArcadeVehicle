@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof(InputManager))]
+[RequireComponent (typeof(VehicleInputController))]
 
-public class carController : MonoBehaviour
+public class VehicleMovement : MonoBehaviour
 {
 	internal enum driveType
 	{
@@ -66,8 +66,8 @@ public class carController : MonoBehaviour
 
 	public float driftX { get; private set; }
 
-	private CarAiController cac;
-	private InputManager im;
+	private VehicleAIController cac;
+	private VehicleInputController im;
 	private Rigidbody car;
 	private float totalTorque;
 	private float outputTorque;
@@ -99,9 +99,9 @@ public class carController : MonoBehaviour
 
 	void Awake ()
 	{
-		cac = GetComponent<CarAiController> ();
+		cac = GetComponent<VehicleAIController> ();
 		car = GetComponent<Rigidbody> ();
-		im = GetComponent<InputManager> ();
+		im = GetComponent<VehicleInputController> ();
 	}
 
 	void FixedUpdate ()

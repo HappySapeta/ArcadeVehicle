@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class tachometer : MonoBehaviour
+public class TachometerDisplay : MonoBehaviour
 {
 
-	public carController cc;
+	public VehicleMovement cc;
 	public float maxInput, minInput;
 	public float correction;
 	public float multiplier;

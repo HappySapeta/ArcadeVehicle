@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class cameraController : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
 	[Range (0, 1)]public float bias = 0.96f;
 	public float height;

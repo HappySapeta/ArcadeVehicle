@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class configureVehicleSubsteps : MonoBehaviour {
+public class ConfigureVehicleSubsteps : MonoBehaviour {
 
 	public float criticalSpeed;
 	public int stepsBelow;

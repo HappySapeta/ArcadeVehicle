@@ -5,7 +5,7 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class CircuitFollowScript : MonoBehaviour
 {
-    public carController car;
+    public VehicleMovement car;
     public TrackBuilder trackBuilder;
     public int lookAheadOffset;
     public bool gizmo;

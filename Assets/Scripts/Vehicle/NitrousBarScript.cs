@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class NitrousBarScript : MonoBehaviour
 {
-	public carController car;
+	public VehicleMovement car;
 
 	private Image nitrousBar;
 	// Use this for initialization

@@ -2,9 +2,9 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class speedoMeter : MonoBehaviour
+public class SpeedoMeterDisplay : MonoBehaviour
 {
-	public carController cc;
+	public VehicleMovement cc;
 
 	private Text digit0, digit1, digit2, gear;
 

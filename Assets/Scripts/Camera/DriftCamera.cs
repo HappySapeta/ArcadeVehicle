@@ -12,7 +12,7 @@ public class DriftCamera : MonoBehaviour
 		public KeyCode switchViewKey = KeyCode.Space;
 	}
 
-	public carController car;
+	public VehicleMovement car;
 	public float speedFactor;
 	public float basePositionValue;
 
