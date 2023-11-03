@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using AI;
+using UnityEngine;
+using Utility;
+using Vehicle;
 
 public class VehicleAIController : MonoBehaviour
 {
@@ -53,8 +56,8 @@ public class VehicleAIController : MonoBehaviour
         SetSteerInput();
         SetThrottleBrakeInput();
 
-        _vehicleInput.forward = throttle;
-        _vehicleInput.backward = brake;
+        _vehicleInput.Forward = throttle;
+        _vehicleInput.Backward = brake;
         _vehicleInput.Horizontal = steer;
     }
 

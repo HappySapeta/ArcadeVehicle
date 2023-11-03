@@ -1,55 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-internal enum playerType
+namespace Vehicle
 {
-	human_pc,
-	human_mobile,
-	bot
-}
-
-public class VehicleInputController : MonoBehaviour
-{
-	[SerializeField]private playerType _playerType;
-
-
-	public float Horizontal { get; set; }
-
-	public float forward{ get; set; }
-
-	public float backward{ get; set; }
-
-	void Start ()
+	public class VehicleInputController : MonoBehaviour
 	{
+		public float Horizontal { get; set; }
+
+		public float Forward{ get; set; }
+
+		public float Backward{ get; set; }
 		
-	}
-
-
-	void Update ()
-	{
-		if (_playerType == playerType.human_pc) {
-			
-
+		void Update ()
+		{
 			Horizontal = Input.GetAxis ("Horizontal");
-			forward = (Input.GetAxis ("Vertical") > 0) ? Input.GetAxis ("Vertical") : 0;
-			backward = (Input.GetAxis ("Vertical") < 0) ? Input.GetAxis ("Vertical") : 0;
-		} else if (_playerType == playerType.human_mobile) {
-			forward = (Input.acceleration.y > 0) ? Input.acceleration.y : 0;
-			backward = (Input.acceleration.y < 0) ? Input.acceleration.y : 0;
-		} else {
-			// do nothing.
-			// AI script provides input.
+			Forward = Mathf.Max(Input.GetAxis("Vertical"), 0);
+			Backward = Mathf.Min(Input.GetAxis("Vertical"), 0);
 		}
-	}
-
-	public int ReturnPlayerType ()
-	{
-		if (_playerType == playerType.bot)
-			return 2;
-		else if (_playerType == playerType.human_mobile)
-			return 1;
-		else
-			return 0;
 	}
 }

@@ -1,54 +1,56 @@
-﻿using UnityEngine;
+﻿using Vehicle;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
-public class SpeedoMeterDisplay : MonoBehaviour
+namespace UI
 {
-	public VehicleMovement cc;
-
-	private Text digit0, digit1, digit2, gear;
-
-	private float fd0, fd1, fd2;
-	private int d0, d1, d2;
-	// Use this for initialization
-	void Awake ()
+	public class SpeedoMeterDisplay : MonoBehaviour
 	{
-		digit0 = transform.GetChild (0).GetComponent<Text> ();
-		digit1 = transform.GetChild (1).GetComponent<Text> ();
-		digit2 = transform.GetChild (2).GetComponent<Text> ();
-		gear = transform.GetChild (3).GetComponent<Text> ();
-	}
+		[SerializeField] 
+		private VehicleMovement vehicle;
+
+		private Text digit0, digit1, digit2, gear;
+
+		// Use this for initialization
+		void Awake ()
+		{
+			digit0 = transform.GetChild (0).GetComponent<Text> ();
+			digit1 = transform.GetChild (1).GetComponent<Text> ();
+			digit2 = transform.GetChild (2).GetComponent<Text> ();
+			gear = transform.GetChild (3).GetComponent<Text> ();
+		}
 	
-	// Update is called once per frame
-	void Update ()
-	{
-		fd2 = cc.currSpeed % 10;
-		fd1 = (cc.currSpeed / 10) % 10;
-		fd0 = (cc.currSpeed / 100) % 10;
+		// Update is called once per frame
+		void Update ()
+		{
+			int unitsPlace = Mathf.Abs((int)(vehicle.currSpeed % 10));
+			int tensPlace = Mathf.Abs((int)((vehicle.currSpeed / 10) % 10));
+			int hundredsPlace = Mathf.Abs((int)((vehicle.currSpeed / 100) % 10));
 
-		d2 = (int)fd2;
-		d1 = (int)fd1;
-		d0 = (int)fd0;
+			digit2.text = unitsPlace.ToString ();
+			digit1.text = tensPlace.ToString ();
+			digit0.text = hundredsPlace.ToString ();
 
-		if (d0 < 0)
-			d0 *= -1;
-		if (d1 < 0)
-			d1 *= -1;
-		if (d2 < 0)
-			d2 *= -1;
+			switch (vehicle.gearNum)
+			{
+				case -1:
+				{
+					gear.text = "R";
+					break;
+				}
 
-		digit2.text = d2.ToString ();
-		digit1.text = d1.ToString ();
-		digit0.text = d0.ToString ();
+				case 0:
+				{
+					gear.text = "N";
+					break;
+				}
 
-
-			
-
-		if (cc.gearNum == -1)
-			gear.text = "R";
-		else if (cc.gearNum == 0)
-			gear.text = "N";
-		else
-			gear.text = cc.gearNum.ToString ();
+				case 1:
+				{
+					gear.text = vehicle.gearNum.ToString ();
+					break;
+				}
+			}
+		}
 	}
 }

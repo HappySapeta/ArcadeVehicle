@@ -1,36 +1,44 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using Vehicle;
+using UnityEngine;
+using UnityEngine.Serialization;
 
-public class TachometerDisplay : MonoBehaviour
+namespace UI
 {
-
-	public VehicleMovement cc;
-	public float maxInput, minInput;
-	public float correction;
-	public float multiplier;
-	private float input;
-	public float rotationSpeed;
-
-	// Use this for initialization
-	void Start ()
+	public class TachometerDisplay : MonoBehaviour
 	{
+		[FormerlySerializedAs("cc"), SerializeField] 
+		private VehicleMovement vehicle;
+
+		[SerializeField] 
+		private float maxInput;
 	
-	}
+		[SerializeField]
+		private float minInput;
 	
-	// Update is called once per frame
-	void Update ()
-	{
-		input = Mathf.Abs (cc.engineRPM);
-		input = Mathf.Clamp (input, minInput, cc.maxGearChangeRPM);
+		[FormerlySerializedAs("baseCorrection")] [FormerlySerializedAs("correction")] [SerializeField]
+		private float angleOffset;
+	
+		[FormerlySerializedAs("multiplier")] [SerializeField]
+		private float angleMultiplier;
+	
+		[SerializeField]
+		private float rotationSpeed;
+	
+		private float input;
+	
+		void Update ()
+		{
+			input = Mathf.Abs (vehicle.engineRPM);
+			input = Mathf.Clamp (input, minInput, vehicle.maxGearChangeRPM);
 
-		float angle = 0;
-		angle = Mathf.SmoothStep (angle, Mathf.Asin (input / maxInput) * multiplier, rotationSpeed);
+			float angle = 0;
+			angle = Mathf.SmoothStep (angle, Mathf.Asin (input / maxInput) * angleMultiplier, rotationSpeed);
 
+			float valueCorrection = (vehicle.gearNum == 1 || vehicle.gearNum == -1) ? 25 : angleOffset;
+			angle += valueCorrection;
 
-		float crr = (cc.gearNum == 1 || cc.gearNum == -1) ? 25 : correction;
-		angle += crr;
-
-		Quaternion newRot = Quaternion.Euler (0, 0, angle);
-		transform.rotation = Quaternion.RotateTowards (transform.rotation, newRot, rotationSpeed);
+			Quaternion newRot = Quaternion.Euler (0, 0, angle);
+			transform.rotation = Quaternion.RotateTowards (transform.rotation, newRot, rotationSpeed);
+		}
 	}
 }

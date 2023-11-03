@@ -1,22 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class ConfigureVehicleSubsteps : MonoBehaviour {
+namespace Vehicle
+{
+	public class ConfigureVehicleSubsteps : MonoBehaviour {
 
-	public float criticalSpeed;
-	public int stepsBelow;
-	public int stepsAbove;
-
-	private WheelCollider wc;
-
-	// Use this for initialization
-	void Start () {
-		wc = GetComponentInChildren<WheelCollider> ();
-	}
+		[SerializeField]
+		private float criticalSpeed;
 	
-	// Update is called once per frame
-	void Update () {
-		wc.ConfigureVehicleSubsteps (criticalSpeed, stepsBelow, stepsAbove);
+		[SerializeField]
+		private int stepsBelow;
+	
+		[SerializeField]
+		private int stepsAbove;
+
+		private WheelCollider wheelCollider;
+
+		// Use this for initialization
+		void Start () 
+		{
+			wheelCollider = GetComponentInChildren<WheelCollider>();
+			wheelCollider.ConfigureVehicleSubsteps(criticalSpeed, stepsBelow, stepsAbove);
+		}
 	}
 }

@@ -1,63 +1,61 @@
-﻿using UnityEngine;
+﻿// Adapted from - https://github.com/Unity-Technologies/VehicleTools/blob/master/Assets/Scripts/EasySuspension.cs
+// Credits - Unity-Technologies
 
-[ExecuteInEditMode]
-public class EasySuspension : MonoBehaviour
+using UnityEngine;
+
+namespace Vehicle
 {
-	[Range (0.1f, 20f)]
-	[Tooltip ("Natural frequency of the suspension springs. Describes bounciness of the suspension.")]
-	public float naturalFrequency = 10;
-
-	[Range (0f, 3f)]
-	[Tooltip ("Damping ratio of the suspension springs. Describes how fast the spring returns back after a bounce. ")]
-	public float dampingRatio = 0.8f;
-
-	[Range (-1f, 1f)]
-	[Tooltip ("The distance along the Y axis the suspension forces application point is offset below the center of mass")]
-	public float forceShift = 0.03f;
-
-	[Tooltip ("Adjust the length of the suspension springs according to the natural frequency and damping ratio. When off, can cause unrealistic suspension bounce.")]
-	public bool setSuspensionDistance = true;
-
-	Rigidbody m_Rigidbody;
-
-	void Start ()
+	[ExecuteInEditMode]
+	public class EasySuspension : MonoBehaviour
 	{
-		m_Rigidbody = GetComponent<Rigidbody> ();
-	}
+		[Range (0.1f, 20f)]
+		[Tooltip ("Natural frequency of the suspension springs. Describes bounciness of the suspension.")]
+		public float naturalFrequency = 10;
 
-	void Update ()
-	{
-		// Work out the stiffness and damper parameters based on the better spring model.
-		foreach (WheelCollider wc in GetComponentsInChildren<WheelCollider>()) {
-			JointSpring spring = wc.suspensionSpring;
+		[Range (0f, 3f)]
+		[Tooltip ("Damping ratio of the suspension springs. Describes how fast the spring returns back after a bounce. ")]
+		public float dampingRatio = 0.8f;
 
-			float sqrtWcSprungMass = Mathf.Sqrt (wc.sprungMass);
-			spring.spring = sqrtWcSprungMass * naturalFrequency * sqrtWcSprungMass * naturalFrequency;
-			spring.damper = 2f * dampingRatio * Mathf.Sqrt (spring.spring * wc.sprungMass);
+		[Range (-1f, 1f)]
+		[Tooltip ("The distance along the Y axis the suspension forces application point is offset below the center of mass")]
+		public float forceShift = 0.03f;
 
-			wc.suspensionSpring = spring;
+		[Tooltip ("Adjust the length of the suspension springs according to the natural frequency and damping ratio. When off, can cause unrealistic suspension bounce.")]
+		public bool setSuspensionDistance = true;
 
-			Vector3 wheelRelativeBody = transform.InverseTransformPoint (wc.transform.position);
-			float distance = m_Rigidbody.centerOfMass.y - wheelRelativeBody.y + wc.radius;
+		Rigidbody m_Rigidbody;
+		private WheelCollider[] m_WheelColliders;
 
-			wc.forceAppPointDistance = distance - forceShift;
-
-			// Make sure the spring force at maximum droop is exactly zero
-			if (spring.targetPosition > 0 && setSuspensionDistance)
-				wc.suspensionDistance = wc.sprungMass * Physics.gravity.magnitude / (spring.targetPosition * spring.spring);
-		}
-	}
-
-	/*
-	void OnGUI ()
-	{
-		foreach (WheelCollider wc in GetComponentsInChildren<WheelCollider>()) {
-			GUILayout.Label (string.Format ("{0} sprung: {1}, k: {2}, d: {3}", wc.name, wc.sprungMass, wc.suspensionSpring.spring, wc.suspensionSpring.damper));
+		void Start ()
+		{
+			m_Rigidbody = GetComponent<Rigidbody> ();
+			m_WheelColliders = GetComponentsInChildren<WheelCollider>();
 		}
 
-		GUILayout.Label ("Inertia: " + m_Rigidbody.inertiaTensor);
-		GUILayout.Label ("Mass: " + m_Rigidbody.mass);
-		GUILayout.Label ("Center: " + m_Rigidbody.centerOfMass);
+		void Update ()
+		{
+			// Work out the stiffness and damper parameters based on the better spring model.
+			foreach (WheelCollider wheel in m_WheelColliders) 
+			{
+				JointSpring spring = wheel.suspensionSpring;
+
+				float sqrtWcSprungMass = Mathf.Sqrt (wheel.sprungMass);
+				spring.spring = sqrtWcSprungMass * naturalFrequency * sqrtWcSprungMass * naturalFrequency;
+				spring.damper = 2f * dampingRatio * Mathf.Sqrt (spring.spring * wheel.sprungMass);
+
+				wheel.suspensionSpring = spring;
+
+				Vector3 wheelRelativeBody = transform.InverseTransformPoint (wheel.transform.position);
+				float distance = m_Rigidbody.centerOfMass.y - wheelRelativeBody.y + wheel.radius;
+
+				wheel.forceAppPointDistance = distance - forceShift;
+
+				// Make sure the spring force at maximum droop is exactly zero
+				if (spring.targetPosition > 0 && setSuspensionDistance)
+				{ 
+					wheel.suspensionDistance = wheel.sprungMass * Physics.gravity.magnitude / (spring.targetPosition * spring.spring);
+				}
+			}
+		}
 	}
-    */
 }

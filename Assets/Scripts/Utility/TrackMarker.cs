@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Utility;
 
 //[RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(TrackBuilder))]
