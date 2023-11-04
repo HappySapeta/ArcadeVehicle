@@ -8,5 +8,4 @@ Features:
 1. Engine and Drivetrain Simulation
 2. Dynamic Wheel friction adjustment to provide an arcade-live vehicle control.
 
-https://github.com/AnupamSahu/ArcadeVehicle/assets/35849508/b8bbefbc-cabe-42a9-984f-16a93bbdd867
-
+![Arcade Vehicle](https://github.com/AnupamSahu/ArcadeVehicle/assets/35849508/5ae4373c-6412-4dce-829b-fd62c45e6e07)
