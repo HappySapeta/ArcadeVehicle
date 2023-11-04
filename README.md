@@ -1,6 +1,6 @@
 # ArcadeVehicle
 
-An arcady vehicle simulation made with Unity.
+An arcady vehicle simulator made with Unity.
 This project was originally built with Unity 2018 and recently upgraded to support Unity 2022.
 
 Features:
