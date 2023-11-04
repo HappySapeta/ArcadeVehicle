@@ -45,7 +45,7 @@ namespace UI
 					break;
 				}
 
-				case 1:
+				default:
 				{
 					gear.text = vehicle.currentGearNum.ToString ();
 					break;
