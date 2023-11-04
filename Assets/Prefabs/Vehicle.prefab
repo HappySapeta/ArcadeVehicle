@@ -3424,11 +3424,11 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.35
   m_SuspensionSpring:
-    spring: 40036.844
-    damper: 6405.895
+    spring: 38219.17
+    damper: 3364.226
     targetPosition: 0.5
-  m_SuspensionDistance: 0.19620001
-  m_ForceAppPointDistance: 0.46682516
+  m_SuspensionDistance: 0.20554641
+  m_ForceAppPointDistance: -0.027175367
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -14670,11 +14670,11 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.35
   m_SuspensionSpring:
-    spring: 38383.01
-    damper: 6141.282
+    spring: 36636.555
+    damper: 3224.9167
     targetPosition: 0.5
-  m_SuspensionDistance: 0.1962
-  m_ForceAppPointDistance: 0.46682537
+  m_SuspensionDistance: 0.2055464
+  m_ForceAppPointDistance: -0.027175307
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -14916,11 +14916,11 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.35
   m_SuspensionSpring:
-    spring: 39088.21
-    damper: 6254.1143
+    spring: 37311.906
+    damper: 3284.3643
     targetPosition: 0.5
-  m_SuspensionDistance: 0.19620003
-  m_ForceAppPointDistance: 0.39682505
+  m_SuspensionDistance: 0.20554638
+  m_ForceAppPointDistance: -0.09717527
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -15661,11 +15661,11 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.35
   m_SuspensionSpring:
-    spring: 37491.93
-    damper: 5998.7085
+    spring: 35784.383
+    damper: 3149.9045
     targetPosition: 0.5
-  m_SuspensionDistance: 0.19620001
-  m_ForceAppPointDistance: 0.39682546
+  m_SuspensionDistance: 0.20554638
+  m_ForceAppPointDistance: -0.09717533
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -16433,206 +16433,192 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e66cba0cf7123c64d87802f402296fb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topSpeed: 330
-  accleration: 1
-  boostForce: 1000
-  boostAmt: 100
-  isBoosting: 0
-  brakingPower: 1000
+  engineParameters:
+    torqueCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -6.9767
+        value: 99.44826
+        inSlope: 0.042073015
+        outSlope: 0.042073015
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 4464.741
+        value: 444.80655
+        inSlope: 0.1904194
+        outSlope: 0.1904194
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6681.9595
+        value: 552.5776
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 8201.011
+        value: 514.32025
+        inSlope: -0.045683604
+        outSlope: -0.045683604
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 9000
+        value: 0
+        inSlope: -1.1291952
+        outSlope: -1.1291952
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    idleRPM: 1000
+    maxGearChangeRPM: 8500
+    minGearChangeRPM: 5000
+  drivetrainParameters:
+    carDriveType: 2
+    gearRatios:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -0.99999994
+        value: 2.3
+        inSlope: 0
+        outSlope: 0.41500008
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1
+        value: 3.13
+        inSlope: 0.41500008
+        outSlope: -0.5400002
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 2
+        value: 2.59
+        inSlope: -0.5400002
+        outSlope: -0.6299999
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 3
+        value: 1.96
+        inSlope: -0.6299999
+        outSlope: -0.72
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 4
+        value: 1.24
+        inSlope: -0.72
+        outSlope: -0.26
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 5
+        value: 0.98
+        inSlope: -0.26
+        outSlope: -0
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6
+        value: 0.98
+        inSlope: 0
+        outSlope: -0.14000005
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 7
+        value: 0.84
+        inSlope: -0.14000005
+        outSlope: 0
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    gearSpeeds:
+    - 60
+    - 100
+    - 135
+    - 177
+    - 223
+    - 280
+    validateGearSpeeds: 1
+    finalDriveRatio1: 4.89
+    finalDriveRatio2: 3.94
+    differentialTorqueDrop: 0.04
+  arcadeMovementParameters:
+    topSpeed: 330
+    accleration: 1
+    boostForce: 1000
+    boostAmt: 100
+    brakingPower: 1000
+    topSpeedDrag: 0.03
+    idleDrag: 0.2
+    runningDrag: 0.02
+  arcadeWheelParameters:
+    forwardFrictionSpeedFactor: 10
+    baseFwdExtremum: 1
+    baseFwdAsymptote: 0.5
+    baseSideAsymptote: 1
+    baseSideExtremum: 0.75
+    driftVelocityFactor: 0.05
+    defaultForwardStiffness: 1
+    maxSidewaysStiffness: 1.1
+    maxSidewaysFrictionValue: 1.5
+  arcadeSteeringParameters:
+    turnPower: 20
+    revTorquePower: 3000
+    maxSteerAngle: 35
+    steerSensitivity: 0.1
+    speedDependencyFactor: 0.4
+    steerAngleLimitingFactor: 15
+  wheelSetup:
+    wheelMesh:
+    - {fileID: 4322827881102040}
+    - {fileID: 4650873200299916}
+    - {fileID: 4362099466925944}
+    - {fileID: 4695300172339174}
+    wheelColliders:
+    - {fileID: 146883149128713346}
+    - {fileID: 146596679702348734}
+    - {fileID: 146657425708851860}
+    - {fileID: 146059958656394334}
   driftPower: 100
-  driftAllowed: 1
-  carDriveType: 2
-  gearRatios:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.99999994
-      value: 2.3
-      inSlope: 0
-      outSlope: 0.41500008
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 3.13
-      inSlope: 0.41500008
-      outSlope: -0.5400002
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 2
-      value: 2.59
-      inSlope: -0.5400002
-      outSlope: -0.6299999
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 3
-      value: 1.96
-      inSlope: -0.6299999
-      outSlope: -0.72
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 4
-      value: 1.24
-      inSlope: -0.72
-      outSlope: -0.26
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 5
-      value: 0.98
-      inSlope: -0.26
-      outSlope: -0
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 6
-      value: 0.98
-      inSlope: 0
-      outSlope: -0.14000005
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 7
-      value: 0.84
-      inSlope: -0.14000005
-      outSlope: 0
-      tangentMode: 69
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  torqueCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -6.9767
-      value: 99.44826
-      inSlope: 0.042073015
-      outSlope: 0.042073015
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 4464.741
-      value: 444.80655
-      inSlope: 0.1904194
-      outSlope: 0.1904194
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 6681.9595
-      value: 552.5776
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 8201.011
-      value: 514.32025
-      inSlope: -0.045683604
-      outSlope: -0.045683604
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 9000
-      value: 0
-      inSlope: -1.1291952
-      outSlope: -1.1291952
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  checkSpeeds: 1
-  gearSpeeds:
-  - 60
-  - 100
-  - 135
-  - 177
-  - 223
-  - 280
-  idleRPM: 1000
-  maxGearChangeRPM: 8500
-  minGearChangeRPM: 5000
-  smoothTime: 0.05
-  finalDriveRatio1: 4.89
-  finalDriveRatio2: 3.94
-  speedMultiplier: 3.6
-  topSpeedDrag: 0.03
-  idleDrag: 0.2
-  runningDrag: 0.02
-  forwardFrictionSpeedFactor: 10
-  baseFwdExtremum: 1
-  baseFwdAsymptote: 0.5
-  baseSideAsymptote: 1
-  baseSideExtremum: 0.75
-  driftVelocityFactor: 0.05
-  defaultForwardStiffness: 1
-  maxSidewaysStiffness: 1.1
-  maxSidewaysFrictionValue: 1.5
-  turnPower: 20
-  revTorquePower: 3000
-  differentialTorqueDrop: 0.04
-  turnRange: 4
-  autoStraight: 1
-  cgy: 0
-  turnCheckSense: 10000
-  acc: 0
-  throttle: 0
-  resetPoint: {fileID: 0}
-  wheelMesh:
-  - {fileID: 4322827881102040}
-  - {fileID: 4650873200299916}
-  - {fileID: 4362099466925944}
-  - {fileID: 4695300172339174}
-  wheelColliders:
-  - {fileID: 146883149128713346}
-  - {fileID: 146596679702348734}
-  - {fileID: 146657425708851860}
-  - {fileID: 146059958656394334}
-  maxSteerAngle: 35
-  steerSensitivity: 0.1
-  speedDependencyFactor: 0.4
-  steerAngleLimitingFactor: 15
-  engineRPM: 1000.04553
-  gearNum: 1
-  _steerHelper: 0
-  currSpeed: 0
-  fwdInput: 0
-  backInput: 0
-  horizontalInput: 0
-  traction: 1
+  traction: 0.5
   slipLimit: 0.2
-  headingAngle: 0
-  downForce: 0
   criticalDonutSpeed: 40
 --- !u!114 &114142520298277256
 MonoBehaviour:
@@ -16661,9 +16647,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b98f86d8a75a6140bd65d8d52e5b60a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  naturalFrequency: 10
-  dampingRatio: 0.8
-  forceShift: 0.03
+  naturalFrequency: 9.77
+  dampingRatio: 0.43
+  forceShift: 0.524
   setSuspensionDistance: 1
 --- !u!1 &1842185952712910
 GameObject:

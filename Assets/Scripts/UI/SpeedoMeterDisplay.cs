@@ -23,15 +23,15 @@ namespace UI
 		// Update is called once per frame
 		void Update ()
 		{
-			int unitsPlace = Mathf.Abs((int)(vehicle.currSpeed % 10));
-			int tensPlace = Mathf.Abs((int)((vehicle.currSpeed / 10) % 10));
-			int hundredsPlace = Mathf.Abs((int)((vehicle.currSpeed / 100) % 10));
+			int unitsPlace = Mathf.Abs((int)(vehicle.currentSpeed % 10));
+			int tensPlace = Mathf.Abs((int)((vehicle.currentSpeed / 10) % 10));
+			int hundredsPlace = Mathf.Abs((int)((vehicle.currentSpeed / 100) % 10));
 
 			digit2.text = unitsPlace.ToString ();
 			digit1.text = tensPlace.ToString ();
 			digit0.text = hundredsPlace.ToString ();
 
-			switch (vehicle.gearNum)
+			switch (vehicle.currentGearNum)
 			{
 				case -1:
 				{
@@ -47,7 +47,7 @@ namespace UI
 
 				case 1:
 				{
-					gear.text = vehicle.gearNum.ToString ();
+					gear.text = vehicle.currentGearNum.ToString ();
 					break;
 				}
 			}

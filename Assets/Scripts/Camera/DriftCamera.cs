@@ -50,7 +50,7 @@ public class DriftCamera : MonoBehaviour
 	{
 		Vector3 newPos = positionTarget.localPosition;
 
-		newPos.z = basePositionValue + (car.currSpeed / car.topSpeed) * speedFactor;
+		newPos.z = basePositionValue + (car.currentSpeed / car.topSpeed) * speedFactor;
 		positionTarget.localPosition = newPos;
 		if (m_ShowingSideView) {
 			transform.position = sideView.position;

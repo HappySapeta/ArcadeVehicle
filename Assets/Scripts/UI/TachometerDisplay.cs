@@ -28,13 +28,13 @@ namespace UI
 	
 		void Update ()
 		{
-			input = Mathf.Abs (vehicle.engineRPM);
+			input = Mathf.Abs (vehicle.currentEngineRPM);
 			input = Mathf.Clamp (input, minInput, vehicle.maxGearChangeRPM);
 
 			float angle = 0;
 			angle = Mathf.SmoothStep (angle, Mathf.Asin (input / maxInput) * angleMultiplier, rotationSpeed);
 
-			float valueCorrection = (vehicle.gearNum == 1 || vehicle.gearNum == -1) ? 25 : angleOffset;
+			float valueCorrection = (vehicle.currentGearNum == 1 || vehicle.currentGearNum == -1) ? 25 : angleOffset;
 			angle += valueCorrection;
 
 			Quaternion newRot = Quaternion.Euler (0, 0, angle);

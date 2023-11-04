@@ -84,7 +84,7 @@ public class VehicleAIController : MonoBehaviour
     {
         if(control == controlFrom.followTarget)
         {
-            float steerValue = steerSensitivity * angleToTarget * Mathf.Sign(car.currSpeed) + obstacleAvoidanceSteerWeight;
+            float steerValue = steerSensitivity * angleToTarget * Mathf.Sign(car.currentSpeed) + obstacleAvoidanceSteerWeight;
             steer = Mathf.Clamp(steerValue, -1, 1);
         }
     }

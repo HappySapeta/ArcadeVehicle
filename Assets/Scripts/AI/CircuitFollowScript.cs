@@ -38,14 +38,14 @@ namespace AI
             float newFinalIndex = 0;
             carPositionIndex = trackBuilder.GetPositionOnTrack(car.gameObject);
 
-            newFinalIndex = carPositionIndex + offset * Mathf.Clamp(speedFactor * (car.currSpeed / car.topSpeed), 1, 10);
+            newFinalIndex = carPositionIndex + offset * Mathf.Clamp(speedFactor * (car.currentSpeed / car.topSpeed), 1, 10);
 
             finalIndex = (int)newFinalIndex % trackBuilder.newWaypoints.Length;
             finalPosition = trackBuilder.newWaypoints[finalIndex];
 
             Vector3 nextPosition = trackBuilder.newWaypoints[(int)(newFinalIndex + 1) % trackBuilder.newWaypoints.Length];
 
-            float delta = Mathf.Clamp(speedFactor * car.currSpeed + distanceFactor * (1 / Vector3.Distance(transform.position, car.transform.position)), minSpeed, maxSpeed);
+            float delta = Mathf.Clamp(speedFactor * car.currentSpeed + distanceFactor * (1 / Vector3.Distance(transform.position, car.transform.position)), minSpeed, maxSpeed);
 
             transform.position = Vector3.MoveTowards(transform.position, finalPosition, delta);
             transform.LookAt(nextPosition);

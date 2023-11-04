@@ -1,115 +1,147 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Vehicle
 {
-    [RequireComponent(typeof(VehicleInputController))]
-    public class VehicleMovement : MonoBehaviour
+    [Serializable]
+    enum DriveType
     {
-        internal enum driveType
-        {
-            FrontWheelDrive,
-            RearWheelDrive,
-            AllWheelDrive
-        }
+        FrontWheelDrive,
+        RearWheelDrive,
+        AllWheelDrive
+    }
+    
+    [Serializable]
+    struct EngineParameters
+    {
+        public AnimationCurve torqueCurve;
+        public float idleRPM;
+        public float maxGearChangeRPM;
+        public float minGearChangeRPM;
+    }
 
+    [Serializable]
+    struct DrivetrainParameters
+    {
+        public DriveType carDriveType;
+        public AnimationCurve gearRatios;
+        public float[] gearSpeeds;
+        public bool validateGearSpeeds;
+        public float finalDriveRatio1;
+        public float finalDriveRatio2;
+        public float differentialTorqueDrop;
+    }
+
+    [Serializable]
+    struct ArcadeMovementParameters
+    {
         public float topSpeed;
         public float accleration;
-        public float boostForce = 1000;
-        public float boostAmt = 100;
-        [HideInInspector] public bool isBoosting;
+        public float boostForce;
+        public float boostAmt;
         public float brakingPower;
-        public float driftPower;
-        public bool driftAllowed = false;
-        [SerializeField] private driveType carDriveType;
-        public AnimationCurve gearRatios;
-        public AnimationCurve torqueCurve;
-        public bool checkSpeeds = true;
-        public float[] gearSpeeds;
-        public float idleRPM, maxGearChangeRPM, minGearChangeRPM;
-        [HideInInspector] public float smoothTime = 0.3f;
-        public float finalDriveRatio1, finalDriveRatio2;
-        public float speedMultiplier = 2.23694f;
-        public float topSpeedDrag = 0.032f, idleDrag = 0.05f, runningDrag = 0.01f;
+        public float topSpeedDrag;
+        public float idleDrag;
+        public float runningDrag;
+    }
+
+    [Serializable]
+    struct ArcadeWheelParameters
+    {
         public float forwardFrictionSpeedFactor;
-        public float baseFwdExtremum = 1, baseFwdAsymptote = 0.5f;
-        public float baseSideAsymptote, baseSideExtremum;
+        public float baseFwdExtremum;
+        public float baseFwdAsymptote;
+        public float baseSideAsymptote;
+        public float baseSideExtremum;
         public float driftVelocityFactor;
         public float defaultForwardStiffness;
         public float maxSidewaysStiffness;
         public float maxSidewaysFrictionValue;
+    }
+
+    [Serializable]
+    struct ArcadeSteeringParameters
+    {
         public float turnPower;
         public float revTorquePower;
-        public float differentialTorqueDrop;
-        [HideInInspector] public float turnRange = 4f;
-        [HideInInspector] public float autoStraight = 1;
-        [HideInInspector] public float cgy;
-        [HideInInspector] public float turnCheckSense = 10000;
-        [HideInInspector] public float acc;
-        [HideInInspector] public float throttle;
-        public Transform resetPoint;
-        public Transform[] wheelMesh;
-        public WheelCollider[] wheelColliders;
         public float maxSteerAngle;
         public float steerSensitivity;
         public float speedDependencyFactor;
         public float steerAngleLimitingFactor;
-        [HideInInspector] public float engineRPM;
-        [HideInInspector] public int gearNum;
-        [Range(0, 1)] public float _steerHelper;
-        [HideInInspector] public float currSpeed;
-        [HideInInspector] public float fwdInput, backInput, horizontalInput;
-        [HideInInspector] public float traction;
-        [HideInInspector] public float slipLimit;
-        [HideInInspector] public float headingAngle;
-        public float downForce;
-        public float criticalDonutSpeed;
+    }
 
-        public float driftX { get; private set; }
+    [Serializable]
+    struct WheelSetup
+    {
+        public Transform[] wheelMesh;
+        public WheelCollider[] wheelColliders;
+    }
+    
+    [RequireComponent(typeof(VehicleInputController))]
+    public class VehicleMovement : MonoBehaviour
+    {
+        [SerializeField] private EngineParameters engineParameters;
+        [SerializeField] private DrivetrainParameters drivetrainParameters;
+        [SerializeField] private ArcadeMovementParameters arcadeMovementParameters;
+        [SerializeField] private ArcadeWheelParameters arcadeWheelParameters;
+        [SerializeField] private ArcadeSteeringParameters arcadeSteeringParameters;
+        [SerializeField] private WheelSetup wheelSetup;
+        
+        [SerializeField] private float driftPower;
+        [SerializeField] private float traction;
+        [SerializeField] private float slipLimit;
+        [SerializeField] private float criticalDonutSpeed;
+        
+        public float maxGearChangeRPM => engineParameters.maxGearChangeRPM;
+        
+        public float topSpeed => arcadeMovementParameters.topSpeed;
 
-        private VehicleAIController cac;
-        private VehicleInputController im;
-        private Rigidbody car;
+        public float boostAmt => arcadeMovementParameters.boostAmt;
+        
+        private bool _isBoosting;
+        public bool isBoosting => _isBoosting;
+        
+        private float _currentEngineRPM;
+        public float currentEngineRPM => _currentEngineRPM;
+        
+        private int _currentGearNum = 1;
+        public int currentGearNum => _currentGearNum;
+        
+        private float _currSpeed;
+        public float currentSpeed => _currSpeed;
+        
+        private VehicleInputController inputController;
+        private Rigidbody _rigidbody;
+        
+        private float fwdInput, backInput, horizontalInput;
         private float totalTorque;
         private float outputTorque;
-        private bool recharging = false;
-        private float wheelRPM;
-
-        public float steerAngle { get; private set; }
-
-        private float turnAngle;
-        private float maxReverseSpeed = 30;
-        private float reverseDrag = 0.1f;
-        private float local_finalDrive;
-        private WheelFrictionCurve fwf, swf;
-        private float iRPM;
-        private float thrAgg = 0.8f;
+        private float currentWheelRpm;
+        private float steerAngle;
+        private float finalDrive;
         private float currentTorque;
         private float oldRotation;
         private float localSteerHelper;
         private bool drifting;
-        private bool driftTriggered;
-        private float upClamp = 0;
-        private bool prevDriftingStatus = false;
+        private float upClamp;
         private float boostRefillWait = 5;
-        private bool isRefilling = false;
-        private bool burnOut = false;
+        private bool isRefilling;
+        private bool burnOut;
         private float prevAngularVelocity;
         private float angularAcclY;
-        private float prevDriftX = 0;
 
         void Awake()
         {
-            cac = GetComponent<VehicleAIController>();
-            car = GetComponent<Rigidbody>();
-            im = GetComponent<VehicleInputController>();
+            _rigidbody = GetComponent<Rigidbody>();
+            inputController = GetComponent<VehicleInputController>();
         }
 
         void FixedUpdate()
         {
-            fwdInput = im.Forward;
-            backInput = im.Backward;
-            horizontalInput = im.Horizontal;
+            fwdInput = inputController.Forward;
+            backInput = inputController.Backward;
+            horizontalInput = inputController.Horizontal;
             adjustFinalDrive();
             addBoostTorque();
             moveCar();
@@ -125,41 +157,26 @@ namespace Vehicle
             steerHelper();
             tractionControl();
             driftCar();
-            resetCar();
-            CalculateHeadingAngle();
-        }
-
-        void resetCar()
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                car.velocity = Vector3.zero;
-                transform.position = resetPoint.position;
-                transform.forward = resetPoint.forward;
-            }
         }
 
         void moveCar()
         {
-            float leftWheelTorque = 0;
-            float rightWheelTorque = 0;
+            float leftWheelTorque, rightWheelTorque;
             calcTorque();
-            if (carDriveType == driveType.AllWheelDrive)
+            if (drivetrainParameters.carDriveType == DriveType.AllWheelDrive)
             {
                 outputTorque = totalTorque / 4;
-                leftWheelTorque = outputTorque *
-                                  (1 - Mathf.Clamp(differentialTorqueDrop * ((steerAngle < 0) ? -steerAngle : 0), 0, 0.9f));
-                rightWheelTorque = outputTorque *
-                                   (1 - Mathf.Clamp(differentialTorqueDrop * ((steerAngle > 0) ? steerAngle : 0), 0, 0.9f));
-                wheelColliders[0].motorTorque = wheelColliders[2].motorTorque = leftWheelTorque;
-                wheelColliders[1].motorTorque = wheelColliders[3].motorTorque = rightWheelTorque;
+                leftWheelTorque = outputTorque * (1 - Mathf.Clamp(drivetrainParameters.differentialTorqueDrop * ((steerAngle < 0) ? -steerAngle : 0), 0, 0.9f));
+                rightWheelTorque = outputTorque * (1 - Mathf.Clamp(drivetrainParameters.differentialTorqueDrop * ((steerAngle > 0) ? steerAngle : 0), 0, 0.9f));
+                wheelSetup.wheelColliders[0].motorTorque = wheelSetup.wheelColliders[2].motorTorque = leftWheelTorque;
+                wheelSetup.wheelColliders[1].motorTorque = wheelSetup.wheelColliders[3].motorTorque = rightWheelTorque;
             }
-            else if (carDriveType == driveType.FrontWheelDrive)
+            else if (drivetrainParameters.carDriveType == DriveType.FrontWheelDrive)
             {
                 outputTorque = totalTorque / 2;
                 for (int i = 0; i < 2; i++)
                 {
-                    wheelColliders[i].motorTorque = outputTorque;
+                    wheelSetup.wheelColliders[i].motorTorque = outputTorque;
                 }
             }
             else
@@ -167,23 +184,25 @@ namespace Vehicle
                 outputTorque = totalTorque / 2;
                 for (int i = 2; i < 4; i++)
                 {
-                    wheelColliders[i].motorTorque = outputTorque;
+                    wheelSetup.wheelColliders[i].motorTorque = outputTorque;
                 }
             }
         }
 
         void steerCar()
         {
-            float x = horizontalInput * (maxSteerAngle - (currSpeed / topSpeed) * steerAngleLimitingFactor);
-            float steerSpeed = steerSensitivity + (currSpeed / topSpeed) * speedDependencyFactor;
+            float x = horizontalInput * (arcadeSteeringParameters.maxSteerAngle - (_currSpeed / arcadeMovementParameters.topSpeed) * arcadeSteeringParameters.steerAngleLimitingFactor);
+            float steerSpeed = arcadeSteeringParameters.steerSensitivity + (_currSpeed / arcadeMovementParameters.topSpeed) * arcadeSteeringParameters.speedDependencyFactor;
 
             steerAngle = Mathf.SmoothStep(steerAngle, x, steerSpeed);
 
-            wheelColliders[0].steerAngle = steerAngle;
-            wheelColliders[1].steerAngle = steerAngle;
+            wheelSetup.wheelColliders[0].steerAngle = steerAngle;
+            wheelSetup.wheelColliders[1].steerAngle = steerAngle;
 
             if (!isFlying())
-                car.AddRelativeTorque(transform.up * turnPower * currSpeed * horizontalInput);
+            {
+                _rigidbody.AddRelativeTorque(transform.up * (arcadeSteeringParameters.turnPower * _currSpeed * horizontalInput));
+            }
         }
 
         void brakeCar()
@@ -194,28 +213,28 @@ namespace Vehicle
             {
                 if (Input.GetKey(KeyCode.Space))
                 {
-                    wheelColliders[i].brakeTorque = brakingPower;
+                    wheelSetup.wheelColliders[i].brakeTorque = arcadeMovementParameters.brakingPower;
                 }
                 else
-                    wheelColliders[i].brakeTorque = 0;
+                    wheelSetup.wheelColliders[i].brakeTorque = 0;
             }
 
-            if (backInput < 0 && wheelRPM > 0 && currSpeed > 0)
+            if (backInput < 0 && currentWheelRpm > 0 && _currSpeed > 0)
             {
                 dir = 1;
             }
-            else if (fwdInput > 0 && wheelRPM < 0 && currSpeed < 0)
+            else if (fwdInput > 0 && currentWheelRpm < 0 && _currSpeed < 0)
             {
                 dir = 1;
             }
 
-            wheelColliders[0].brakeTorque = wheelColliders[1].brakeTorque = dir * brakingPower;
+            wheelSetup.wheelColliders[0].brakeTorque = wheelSetup.wheelColliders[1].brakeTorque = dir * arcadeMovementParameters.brakingPower;
 
             if ((Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.S)) ||
-                (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.UpArrow)) && currSpeed < 5)
+                (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.UpArrow)) && _currSpeed < 5)
             {
                 burnOut = true;
-                wheelColliders[0].brakeTorque = wheelColliders[1].brakeTorque = 5000;
+                wheelSetup.wheelColliders[0].brakeTorque = wheelSetup.wheelColliders[1].brakeTorque = 5000;
             }
             else
                 burnOut = false;
@@ -223,42 +242,37 @@ namespace Vehicle
 
         void driftCar()
         {
-            if (currSpeed > 0 && Mathf.Abs(horizontalInput) > 0 && (backInput < 0 || Input.GetKey(KeyCode.Space)) &&
+            if (_currSpeed > 0 && Mathf.Abs(horizontalInput) > 0 && (backInput < 0 || Input.GetKey(KeyCode.Space)) &&
                 (!isFlying()))
             {
-                driftTriggered = true;
                 float localDriftPower = Input.GetKey(KeyCode.Space) ? driftPower : 0.8f * driftPower;
-                float torque = Mathf.Clamp(localDriftPower * horizontalInput * currSpeed, -15000, 15000);
-                car.AddRelativeTorque(transform.up * torque);
-            }
-            else
-            {
-                driftTriggered = false;
+                float torque = Mathf.Clamp(localDriftPower * horizontalInput * _currSpeed, -15000, 15000);
+                _rigidbody.AddRelativeTorque(transform.up * torque);
             }
         }
 
         void adjustFinalDrive()
         {
-            if (gearNum == 1 || gearNum == 4 || gearNum == 5)
+            if (_currentGearNum == 1 || _currentGearNum == 4 || _currentGearNum == 5)
             {
-                local_finalDrive = finalDriveRatio1;
+                finalDrive = drivetrainParameters.finalDriveRatio1;
             }
             else
             {
-                local_finalDrive = finalDriveRatio2;
+                finalDrive = drivetrainParameters.finalDriveRatio2;
             }
         }
 
         void addBoostTorque()
         {
-            if (Input.GetKey(KeyCode.LeftShift) && boostAmt > 0 && currSpeed > 0)
+            if (Input.GetKey(KeyCode.LeftShift) && arcadeMovementParameters.boostAmt > 0 && _currSpeed > 0)
             {
-                isBoosting = true;
+                _isBoosting = true;
                 isRefilling = false;
-                boostAmt = Mathf.MoveTowards(boostAmt, 0, 0.15f);
+                arcadeMovementParameters.boostAmt = Mathf.MoveTowards(arcadeMovementParameters.boostAmt, 0, 0.15f);
             }
             else
-                isBoosting = false;
+                _isBoosting = false;
 
             if (Input.GetKeyUp(KeyCode.LeftShift))
             {
@@ -267,7 +281,7 @@ namespace Vehicle
 
             if (isRefilling)
             {
-                boostAmt = Mathf.MoveTowards(boostAmt, 100, 0.05f);
+                arcadeMovementParameters.boostAmt = Mathf.MoveTowards(arcadeMovementParameters.boostAmt, 100, 0.05f);
             }
         }
 
@@ -279,46 +293,46 @@ namespace Vehicle
 
         void calcTorque()
         {
-            acc = (gearNum == 1) ? Mathf.MoveTowards(0, 1 * fwdInput, thrAgg) : accleration;
-            throttle = (gearNum == -1) ? backInput : fwdInput;
+            float accleration = (_currentGearNum == 1) ? Mathf.MoveTowards(0, 1 * fwdInput, 0.8f) : arcadeMovementParameters.accleration; // 0.8f = thrAgg????
+            float throttle = (_currentGearNum == -1) ? backInput : fwdInput;
             shiftGear();
             getEngineRPM();
-            totalTorque = torqueCurve.Evaluate(engineRPM) * (gearRatios.Evaluate(gearNum)) * local_finalDrive * throttle *
-                          acc;
-            if (isBoosting)
+            totalTorque = engineParameters.torqueCurve.Evaluate(_currentEngineRPM) * (drivetrainParameters.gearRatios.Evaluate(_currentGearNum)) * finalDrive * throttle *
+                          accleration;
+            if (_isBoosting)
             {
-                totalTorque += boostForce;
+                totalTorque += arcadeMovementParameters.boostForce;
             }
 
-            if (engineRPM >= maxGearChangeRPM)
+            if (_currentEngineRPM >= engineParameters.maxGearChangeRPM)
                 totalTorque = 0;
             tractionControl();
         }
 
         void shiftGear()
         {
-            if ((gearNum < gearRatios.length - 1 && engineRPM >= maxGearChangeRPM ||
-                 (gearNum == 0 && (fwdInput > 0 || backInput < 0))) && !isFlying() && checkGearSpeed())
+            if ((_currentGearNum < drivetrainParameters.gearRatios.length - 1 && _currentEngineRPM >= engineParameters.maxGearChangeRPM ||
+                 (_currentGearNum == 0 && (fwdInput > 0 || backInput < 0))) && !isFlying() && checkGearSpeed())
             {
-                //Debug.Log (currSpeed);
-                gearNum++;
+                //Debug.Log (_currSpeed);
+                _currentGearNum++;
             }
 
-            if (gearNum > 1 && engineRPM <= minGearChangeRPM)
-                gearNum--;
+            if (_currentGearNum > 1 && _currentEngineRPM <= engineParameters.minGearChangeRPM)
+                _currentGearNum--;
             if (checkStandStill() && backInput < 0)
-                gearNum = -1;
-            if (gearNum == -1 && checkStandStill() && fwdInput > 0)
-                gearNum = 1;
+                _currentGearNum = -1;
+            if (_currentGearNum == -1 && checkStandStill() && fwdInput > 0)
+                _currentGearNum = 1;
         }
 
         bool checkGearSpeed()
         {
-            if (gearNum != -1)
+            if (_currentGearNum != -1)
             {
-                if (checkSpeeds)
+                if (drivetrainParameters.validateGearSpeeds)
                 {
-                    return currSpeed >= gearSpeeds[gearNum - 1];
+                    return _currSpeed >= drivetrainParameters.gearSpeeds[_currentGearNum - 1];
                 }
                 else
                     return true;
@@ -327,9 +341,9 @@ namespace Vehicle
                 return false;
         }
 
-        void idlingRPM()
+        float idlingRPM()
         {
-            iRPM = (gearNum > 1) ? 0 : idleRPM;
+            return _currentGearNum > 1 ? 0 : engineParameters.idleRPM;
         }
 
         void getEngineRPM()
@@ -337,8 +351,7 @@ namespace Vehicle
             idlingRPM();
             getWheelRPM();
             float velocity = 0.0f;
-            engineRPM = Mathf.SmoothDamp(engineRPM,
-                iRPM + (Mathf.Abs(wheelRPM) * local_finalDrive * gearRatios.Evaluate(gearNum)), ref velocity, smoothTime);
+            _currentEngineRPM = Mathf.SmoothDamp(_currentEngineRPM, idlingRPM() + (Mathf.Abs(currentWheelRpm) * finalDrive * drivetrainParameters.gearRatios.Evaluate(_currentGearNum)), ref velocity, 0.05f);
         }
 
         void getWheelRPM()
@@ -347,61 +360,54 @@ namespace Vehicle
             int c = 0;
             for (int i = 0; i < 4; i++)
             {
-                if (wheelColliders[i].isGrounded)
+                if (wheelSetup.wheelColliders[i].isGrounded)
                 {
-                    sum += wheelColliders[i].rpm;
+                    sum += wheelSetup.wheelColliders[i].rpm;
                     c++;
                 }
             }
 
-            wheelRPM = (c != 0) ? sum / c : 0;
-        }
-
-        void getInput()
-        {
-            fwdInput = (Input.GetAxis("Vertical") > 0) ? Input.GetAxis("Vertical") : 0;
-            backInput = (Input.GetAxis("Vertical") < 0) ? Input.GetAxis("Vertical") : 0;
-            horizontalInput = Input.GetAxis("Horizontal");
+            currentWheelRpm = (c != 0) ? sum / c : 0;
         }
 
         void getCarSpeed()
         {
-            currSpeed = Vector3.Dot(transform.forward.normalized, car.velocity);
-            currSpeed *= speedMultiplier;
-            currSpeed = Mathf.Round(currSpeed);
+            _currSpeed = Vector3.Dot(transform.forward.normalized, _rigidbody.velocity);
+            _currSpeed *= 3.6f;
+            _currSpeed = Mathf.Round(_currSpeed);
         }
 
         void animateWheels()
         {
-            Vector3 wheelPosition = Vector3.zero;
-            Quaternion wheelRotation = Quaternion.identity;
+            Vector3 wheelPosition;
+            Quaternion wheelRotation;
 
             for (int i = 0; i < 4; i++)
             {
-                wheelColliders[i].GetWorldPose(out wheelPosition, out wheelRotation);
-                wheelMesh[i].position = wheelPosition;
-                wheelMesh[i].rotation = wheelRotation;
+                wheelSetup.wheelColliders[i].GetWorldPose(out wheelPosition, out wheelRotation);
+                wheelSetup.wheelMesh[i].position = wheelPosition;
+                wheelSetup.wheelMesh[i].rotation = wheelRotation;
             }
         }
 
         void adjustDrag()
         {
-            if (currSpeed >= topSpeed)
-                car.drag = topSpeedDrag;
+            if (_currSpeed >= arcadeMovementParameters.topSpeed)
+                _rigidbody.drag = arcadeMovementParameters.topSpeedDrag;
             else if (outputTorque == 0)
-                car.drag = idleDrag;
-            else if (currSpeed >= maxReverseSpeed && gearNum == -1 && wheelRPM <= 0)
-                car.drag = reverseDrag;
+                _rigidbody.drag = arcadeMovementParameters.idleDrag;
+            else if (_currSpeed >= 30.0f && _currentGearNum == -1 && currentWheelRpm <= 0) // 30 = maxReverseSpeed
+                _rigidbody.drag = 0.1f; // 0.1f = reverseDrag
             else
             {
-                car.drag = runningDrag;
+                _rigidbody.drag = arcadeMovementParameters.runningDrag;
             }
         }
 
         bool isFlying()
         {
-            if (!wheelColliders[0].isGrounded && !wheelColliders[1].isGrounded && !wheelColliders[2].isGrounded &&
-                !wheelColliders[3].isGrounded)
+            if (!wheelSetup.wheelColliders[0].isGrounded && !wheelSetup.wheelColliders[1].isGrounded && !wheelSetup.wheelColliders[2].isGrounded &&
+                !wheelSetup.wheelColliders[3].isGrounded)
             {
                 return true;
             }
@@ -411,7 +417,7 @@ namespace Vehicle
 
         bool checkStandStill()
         {
-            if (currSpeed == 0)
+            if (_currSpeed == 0)
             {
                 return true;
             }
@@ -428,78 +434,63 @@ namespace Vehicle
             if (flatForward.sqrMagnitude > 0)
             {
                 flatForward.Normalize();
-                Vector3 localFlatForward = transform.InverseTransformDirection(flatForward);
-                turnAngle = Mathf.Atan2(localFlatForward.x, localFlatForward.z) * turnCheckSense;
+                transform.InverseTransformDirection(flatForward);
             }
-        }
-
-        bool isTurning()
-        {
-            if (turnAngle > -turnRange && turnAngle < turnRange)
-                return false;
-            else
-                return true;
         }
 
         void adjustForwardFriction()
         {
-            fwf = wheelColliders[0].forwardFriction;
-            fwf.extremumValue =
-                baseFwdExtremum + ((currSpeed <= 0) ? 0 : currSpeed / topSpeed) * forwardFrictionSpeedFactor;
-            fwf.asymptoteValue =
-                baseFwdAsymptote + ((currSpeed <= 0) ? 0 : currSpeed / topSpeed) * forwardFrictionSpeedFactor;
+            WheelFrictionCurve forwardFriction = wheelSetup.wheelColliders[0].forwardFriction;
+            forwardFriction.extremumValue = arcadeWheelParameters.baseFwdExtremum + ((_currSpeed <= 0) ? 0 : _currSpeed / arcadeMovementParameters.topSpeed) * arcadeWheelParameters.forwardFrictionSpeedFactor;
+            forwardFriction.asymptoteValue = arcadeWheelParameters.baseFwdAsymptote + ((_currSpeed <= 0) ? 0 : _currSpeed / arcadeMovementParameters.topSpeed) * arcadeWheelParameters.forwardFrictionSpeedFactor;
 
-            fwf.extremumValue = Mathf.Clamp(fwf.extremumValue, baseFwdExtremum, 5);
-            fwf.asymptoteValue = Mathf.Clamp(fwf.asymptoteValue, baseFwdAsymptote, 5);
+            forwardFriction.extremumValue = Mathf.Clamp(forwardFriction.extremumValue, arcadeWheelParameters.baseFwdExtremum, 5);
+            forwardFriction.asymptoteValue = Mathf.Clamp(forwardFriction.asymptoteValue, arcadeWheelParameters.baseFwdAsymptote, 5);
 
             if (burnOut)
             {
-                fwf.extremumValue = 0.1f;
-                fwf.asymptoteValue = 0.1f;
+                forwardFriction.extremumValue = 0.1f;
+                forwardFriction.asymptoteValue = 0.1f;
             }
 
             for (int i = 0; i < 4; i++)
             {
-                wheelColliders[i].forwardFriction = fwf;
+                wheelSetup.wheelColliders[i].forwardFriction = forwardFriction;
             }
         }
 
         void adjustSidewaysFriction()
         {
-            upClamp = Mathf.SmoothStep(upClamp, maxSidewaysFrictionValue, 0.2f);
-            driftX = Mathf.Abs(transform.InverseTransformVector(car.velocity).x);
-            float driftFactor = driftX * driftVelocityFactor;
+            upClamp = Mathf.SmoothStep(upClamp, arcadeWheelParameters.maxSidewaysFrictionValue, 0.2f);
+            float driftX = Mathf.Abs(transform.InverseTransformVector(_rigidbody.velocity).x);
+            float driftFactor = driftX * arcadeWheelParameters.driftVelocityFactor;
 
-            swf = wheelColliders[0].sidewaysFriction;
+            WheelFrictionCurve sidewaysFriction = wheelSetup.wheelColliders[0].sidewaysFriction;
 
-            float x = baseSideAsymptote + driftFactor;
-            float y = baseSideExtremum + driftFactor;
+            float x = arcadeWheelParameters.baseSideAsymptote + driftFactor;
+            float y = arcadeWheelParameters.baseSideExtremum + driftFactor;
 
-            if (Mathf.Abs(currSpeed) < criticalDonutSpeed)
+            if (Mathf.Abs(_currSpeed) < criticalDonutSpeed)
             {
-                swf.stiffness = 0.8f;
+                sidewaysFriction.stiffness = 0.8f;
             }
             else
-                swf.stiffness = maxSidewaysStiffness;
+            {
+                sidewaysFriction.stiffness = arcadeWheelParameters.maxSidewaysStiffness;
+            }
 
-            swf.asymptoteValue = Mathf.Clamp(x, baseSideAsymptote, maxSidewaysFrictionValue);
-            swf.extremumValue = Mathf.Clamp(y, baseSideAsymptote, maxSidewaysFrictionValue);
+            sidewaysFriction.asymptoteValue = Mathf.Clamp(x, arcadeWheelParameters.baseSideAsymptote, arcadeWheelParameters.maxSidewaysFrictionValue);
+            sidewaysFriction.extremumValue = Mathf.Clamp(y, arcadeWheelParameters.baseSideAsymptote, arcadeWheelParameters.maxSidewaysFrictionValue);
 
             for (int i = 0; i < 4; i++)
             {
-                wheelColliders[i].sidewaysFriction = swf;
+                wheelSetup.wheelColliders[i].sidewaysFriction = sidewaysFriction;
             }
         }
 
         void steerHelper()
         {
-            localSteerHelper = Mathf.SmoothStep(localSteerHelper, _steerHelper * Mathf.Abs(horizontalInput), 0.1f);
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-            {
-                _steerHelper *= -1;
-            }
-
-            foreach (WheelCollider wc in wheelColliders)
+            foreach (WheelCollider wc in wheelSetup.wheelColliders)
             {
                 WheelHit wheelHit;
                 wc.GetGroundHit(out wheelHit);
@@ -509,17 +500,12 @@ namespace Vehicle
 
             if (Mathf.Abs(oldRotation - transform.eulerAngles.y) < 10)
             {
-                float turnAdjust = (transform.eulerAngles.y - oldRotation) * _steerHelper;
+                float turnAdjust = (transform.eulerAngles.y - oldRotation);
                 Quaternion velRotation = Quaternion.AngleAxis(turnAdjust, Vector3.up);
-                car.velocity = velRotation * car.velocity;
+                _rigidbody.velocity = velRotation * _rigidbody.velocity;
             }
 
             oldRotation = transform.eulerAngles.y;
-        }
-
-        void addDownForce()
-        {
-            car.AddForce(-transform.up * downForce * car.velocity.magnitude);
         }
 
         void adjustTorque(float forwardSlip)
@@ -542,53 +528,54 @@ namespace Vehicle
         {
             calcAngularAccl();
 
-            float reverseTorque = -1 * Mathf.Abs(angularAcclY) * revTorquePower * Mathf.Sign(car.angularVelocity.y) *
-                                  (currSpeed / topSpeed);
+            float reverseTorque = -1 * Mathf.Abs(angularAcclY) * arcadeSteeringParameters.revTorquePower * Mathf.Sign(_rigidbody.angularVelocity.y) * (_currSpeed / arcadeMovementParameters.topSpeed);
 
-            car.AddRelativeTorque(transform.up * reverseTorque);
+            _rigidbody.AddRelativeTorque(transform.up * reverseTorque);
         }
 
         void calcAngularAccl()
         {
-            angularAcclY = (prevAngularVelocity - car.angularVelocity.y) / Time.deltaTime;
-            prevAngularVelocity = car.angularVelocity.y;
+            var angularVelocity = _rigidbody.angularVelocity;
+            
+            angularAcclY = (prevAngularVelocity - angularVelocity.y) / Time.deltaTime;
+            prevAngularVelocity = angularVelocity.y;
         }
 
         void tractionControl()
         {
             WheelHit wheelHit;
 
-            switch (carDriveType)
+            switch (drivetrainParameters.carDriveType)
             {
-                case driveType.AllWheelDrive:
-                    foreach (WheelCollider wc in wheelColliders)
+                case DriveType.AllWheelDrive:
+                {
+                    foreach (WheelCollider wc in wheelSetup.wheelColliders)
                     {
                         wc.GetGroundHit(out wheelHit);
                         adjustTorque(wheelHit.forwardSlip);
                     }
 
                     break;
-                case driveType.RearWheelDrive:
-                    wheelColliders[2].GetGroundHit(out wheelHit);
+                }
+                case DriveType.RearWheelDrive:
+                {
+                    wheelSetup.wheelColliders[2].GetGroundHit(out wheelHit);
                     adjustTorque(wheelHit.forwardSlip);
-                    wheelColliders[3].GetGroundHit(out wheelHit);
-                    adjustTorque(wheelHit.forwardSlip);
-
-                    break;
-                case driveType.FrontWheelDrive:
-                    wheelColliders[0].GetGroundHit(out wheelHit);
-                    adjustTorque(wheelHit.forwardSlip);
-                    wheelColliders[1].GetGroundHit(out wheelHit);
+                    wheelSetup.wheelColliders[3].GetGroundHit(out wheelHit);
                     adjustTorque(wheelHit.forwardSlip);
 
                     break;
+                }
+                case DriveType.FrontWheelDrive:
+                {
+                    wheelSetup.wheelColliders[0].GetGroundHit(out wheelHit);
+                    adjustTorque(wheelHit.forwardSlip);
+                    wheelSetup.wheelColliders[1].GetGroundHit(out wheelHit);
+                    adjustTorque(wheelHit.forwardSlip);
+
+                    break;
+                }
             }
-        }
-
-        void CalculateHeadingAngle()
-        {
-            headingAngle = Mathf.Clamp(Mathf.Round(Vector3.SignedAngle(transform.forward, Vector3.forward, Vector3.up)),
-                -90, 90);
         }
     }
 }
